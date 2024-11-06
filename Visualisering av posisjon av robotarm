@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+
+# Parametere
+l1 = 60         # Lengde til overarm
+l2 = 50         # Lengde til underarm
+theta1 = 95     # Vinkel mellom positiv x-akse og "overarm" i grader
+theta2 = -100# Vinkel mellom overarm og underarm i grader
+
+# Variabler for justering av "(x, y)"-posisjon
+xy_label_x_offset = -40.5   # Endre x-posisjonen til (x, y)-etiketten
+xy_label_y_offset = -10.3  # Endre y-posisjonen til (x, y)-etiketten
+
+# Funksjoner for transformasjon
+def M_rotasjon2D(theta):
+    c, s = np.cos(np.radians(theta)), np.sin(np.radians(theta))
+    return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+
+def M_translasjon2D(x, y):
+    return np.array([[1, 0, x], [0, 1, y], [0, 0, 1]])
+
+def konkatener(Mliste):
+    svar = 1
+    for M in reversed(Mliste):
+        svar = np.dot(M, svar)
+    return svar
+
+# Beregn posisjoner
+R1, T1 = M_rotasjon2D(theta1), M_translasjon2D(l1, 0)
+R2, T2 = M_rotasjon2D(theta2), M_translasjon2D(l2, 0)
+posA = np.array([[0], [0], [1]])  # Startpunkt
+posB = konkatener([R1, T1, posA])  # Overarms endepunkt
+posC = konkatener([R1, T1, R2, T2, posA])  # Underarms endepunkt
+
+# Sluttkoordinater
+x_end, y_end = posC[0][0], posC[1][0]
+
+# Visualisering
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.set_xlabel('x', fontsize=12)
+ax.set_ylabel('y', fontsize=12)
+
+# Definerer bredde slik at hele robotarmen vises
+bredde = abs(l1) + abs(l2)
+plt.xlim(-bredde, bredde)
+plt.ylim(-abs(l2), bredde)
+
+# Tegn overarm og underarm
+plt.arrow(posA[0][0], posA[1][0], posB[0][0] - posA[0][0], posB[1][0] - posA[1][0],
+          head_width=0.02 * bredde, color='b', label=r'Overarm $(l_1)$')
+plt.arrow(posB[0][0], posB[1][0], posC[0][0] - posB[0][0], posC[1][0] - posB[1][0],
+          head_width=0.02 * bredde, color='r', label=r'Underarm $(l_2)$')
+
+# Tegn hjelpelinjer for vinkler
+hjelp1 = [[0.25 * np.linalg.norm(posB)], [0], [1]]
+plt.plot([0, hjelp1[0][0]], [0, hjelp1[1][0]], linestyle='dashed', color='gray')
+hjelp2, hjelp3 = posB * 1.25, posB + 0.3 * (posC - posB)
+plt.plot([posB[0][0], hjelp2[0][0]], [posB[1][0], hjelp2[1][0]], linestyle='dashed', color='gray')
+
+# Angir navn på lengder og vinkler
+ax.text(posA[0][0] + 30, posA[1][0] + 15.15, r'$l_1$', fontsize=12)
+ax.text(posB[0][0] + 38, posB[1][0] + -2.15, r'$l_2$', fontsize=12)
+ax.text(0.5 * (hjelp1[0][0] + 0.4 * posB[0][0]), 0.1 * (hjelp1[1][0] + 0.25 * posB[1][0]),
+        r'$\theta_1$', fontsize=12)
+
+# Angir theta_2 med justering
+theta2_text = r'$-\theta_2$' if theta2 < 0 else r'$\theta_2$'
+ax.text(0.5 * (hjelp2[0][0] + hjelp3[0][0]), 0.45 * (hjelp2[1][0] + hjelp3[1][0]),
+        theta2_text, fontsize=12)
+
+# Angir sluttposisjonen til underarmen med faktiske koordinater
+ax.text(x_end + xy_label_x_offset, y_end + xy_label_y_offset, f'({x_end:.1f}, {y_end:.1f})', fontsize=12)
+
+# Legg til base
+ax.add_patch(Rectangle((np.linalg.norm(posB) * -0.1, np.linalg.norm(posB) * -0.2),
+                       np.linalg.norm(posB) * 0.2, np.linalg.norm(posB) * 0.2, color='green'))
+
+plt.legend()
+plt.title('Visualisering av robotarm med to ledd', fontsize=14)
+plt.show()
