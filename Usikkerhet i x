@@ -1,0 +1,73 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Definer parametre
+L1 = 60      # Lengde 1 (cm)
+L2 = 50      # Lengde 2 (cm)
+mu1 = 95       # Innstilt vinkel 1 i grader
+mu2 = -100     # Innstilt vinkel 2 i grader
+sigma1 = 0     # Standardavvik for V1 (cm)
+sigma2 = 0   # Standardavvik for V2 (cm)
+
+# Funksjon for å beregne x
+def calculate_x(L1, L2, mu1, mu2):
+    x = L1 * np.cos(np.radians(mu1)) + L2 * np.cos(np.radians(mu1 + mu2))
+    return x
+
+# Funksjon for å beregne partielle derivertene
+def partial_derivatives(L1, L2, mu1, mu2):
+    d_mu1 = -np.pi/180 * (L1 * np.sin(mu1 * np.pi / 180) + L2 * np.sin((mu1 + mu2) * np.pi / 180))
+    d_mu2 = -np.pi/180 * L2 * np.sin((mu1 + mu2) * np.pi / 180)
+    return d_mu1, d_mu2
+
+# Beregn x og partielle deriverte ved middelverdiene
+x_mean = calculate_x(L1, L2, mu1, mu2)
+d_mu1, d_mu2 = partial_derivatives(L1, L2, mu1, mu2)
+
+# Beregn variansen i X ved hjelp av feilforplantningsformelen
+var_x = (d_mu1 ** 2) * (sigma1 ** 2) + (d_mu2 ** 2) * (sigma2 ** 2)
+print(f"Variansen til X: {var_x:.6f}")
+
+# Sjekk hvilken varians som har størst innflytelse
+var_x_sigma1 = (d_mu1 ** 2) * (sigma1 ** 2)
+var_x_sigma2 = (d_mu2 ** 2) * (sigma2 ** 2)
+
+if var_x_sigma1 > var_x_sigma2:
+    print("Reduksjon av variansen i V1, σ1^2, vil ha størst effekt på å redusere usikkerheten i X.")
+else:
+    print("Reduksjon av variansen i V2, σ2^2, vil ha størst effekt på å redusere usikkerheten i X.")
+    
+# Visualisering av usikkerhetseffekten
+sigma1_range = np.linspace(0, 6, 100)  # Ulike verdier for sigma1
+sigma2_range = np.linspace(0, 6, 100)  # Ulike verdier for sigma2
+
+# Beregn variansen i X som funksjon av sigma1 og sigma2
+var_x_sigma1 = (d_mu1 ** 2) * (sigma1_range ** 2) + (d_mu2 ** 2) * (sigma2 ** 2)
+var_x_sigma2 = (d_mu1 ** 2) * (sigma1 ** 2) + (d_mu2 ** 2) * (sigma2_range ** 2)
+
+# Beregn variansen i X når sigma_1 og sigma_2 begge er lik 2
+var_x_at_sigma_2_2 = (d_mu1 ** 2) * (sigma1 ** 2) + (d_mu2 ** 2) * (sigma2 ** 2)
+var_x_at_sigma_2__2 = (d_mu1 ** 2) * (sigma1 ** 2) + (d_mu2 ** 2) * (5 ** 2) #eksempel når sigma 2 = 5
+
+var_x_at_sigma_1_1 = (d_mu1 ** 2) * (5 ** 2) + (d_mu2 ** 2) * (sigma2 ** 2)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(sigma1_range, var_x_sigma1, label='Varians i X som funksjon av $\sigma_1$', color='blue')
+plt.plot(sigma2_range, var_x_sigma2, label='Varians i X som funksjon av $\sigma_2$', color='red')
+
+# Legg til punktet og koordinatene over det
+plt.plot(5, var_x_at_sigma_2_2, 'ko', markersize=6)  # Plasser prikk på (2, var_x_at_sigma_2__2)
+plt.text(5, var_x_at_sigma_2_2 + 1, f'({5}, {var_x_at_sigma_2__2:.2f})', color='black', ha='center', fontsize=12)
+
+plt.plot(5, var_x_at_sigma_1_1, 'ko', markersize=6)  # Plasser prikk på (2, var_x_at_sigma_1__1)
+plt.text(4.8, var_x_at_sigma_1_1 + 2.5, f'({5}, {var_x_at_sigma_1_1:.2f})', color='black', ha='center', fontsize=12)
+
+# Graf detaljer
+plt.title('Usikkerhet i X-posisjon ved variasjon av $\sigma_1$ og $\sigma_2$', fontsize=14)
+plt.xlabel('Standardavvik ($\sigma$)', fontsize=13)
+plt.ylabel('Usikkerhet i X', fontsize=13)
+#plt.yscale('log')
+plt.grid(True)
+plt.legend()
+plt.show()
