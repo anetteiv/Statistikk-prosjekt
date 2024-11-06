@@ -36,7 +36,7 @@ plt.ylim(2.75, 20)  # Setter x-aksen fra 100 til 120
 # Legge til etiketter og tittel
 plt.xlabel('x-posisjon', fontsize=15)
 plt.ylabel('y-posisjon', fontsize=15)
-plt.title('Simulert fordeling av endepunktsposisjoner', fontsize=16)
+plt.title('Simulert fordeling av endepunktposisjoner', fontsize=16)
 plt.legend()
 plt.grid()
 
