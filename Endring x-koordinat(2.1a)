@@ -1,0 +1,80 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# Definer verdier øverst i koden
+L1 = 60      # Lengde 1 (cm)
+L2 = 50      # Lengde 2 (cm)
+theta1 = 95    # Vinkel 1 i grader
+theta2 = -100  # Vinkel 2 i grader
+delta_theta1 = -5   # Små endringer i theta1
+delta_theta2 = 1   # Små endringer i theta2
+
+# Funksjon for å beregne x
+def calculate_x(L1, L2, theta1, theta2):
+    x = L1 * np.cos((theta1 * np.pi / 180)) + L2 * np.cos((theta1 + theta2)*np.pi / 180)
+    return x
+
+# Funksjon for å beregne partielle derivertene
+def partial_derivatives(L1, L2, theta1, theta2):
+    d_theta1 = -L1 * np.sin((theta1 * np.pi / 180)) - L2 * np.sin(((theta1 + theta2) * np.pi / 180))
+    d_theta2 = -L2 * np.sin((theta1 + theta2) * np.pi / 180)
+    return d_theta1, d_theta2
+
+# Funksjon for å beregne endringer i x ved små endringer i theta1 og theta2
+def kalkuler_endring(L1, L2, theta1, theta2, delta_theta1, delta_theta2):
+    d_theta1, d_theta2 = partial_derivatives(L1, L2, theta1, theta2)
+    
+    delta_x1 = d_theta1 * delta_theta1
+    delta_x2 = d_theta2 * delta_theta2
+    
+    delta_x = delta_x1 + delta_x2
+    return delta_x
+
+# Beregn x, partielle derivertene og endringen i x
+x_initial = calculate_x(L1, L2, theta1, theta2)
+d_theta1, d_theta2 = partial_derivatives(L1, L2, theta1, theta2)
+delta_x = kalkuler_endring(L1, L2, theta1, theta2, delta_theta1, delta_theta2)
+x_posisjon = x_initial + delta_x
+
+# Skriv ut resultatene
+print(f"Initial x: {x_initial:.4f}")
+print(f"Partiell deriverte:")
+print(f"  med hensyn til theta1: {d_theta1:.6f}")
+print(f"  med hensyn til theta2: {d_theta2:.6f}")
+print(f"Endring i x ved små endringer: {delta_x:.6f}")
+print(f"x-posisjon ved en endring av vinkel: {x_posisjon:.6f}")
+
+# Vinkelintervaller
+theta_1_range = np.linspace(0, 180, 100)  # Vinkel 1 fra 0 til 180 grader
+theta_2_range = np.linspace(-180, 180, 100)  # Vinkel 2 fra -180 til 180 grader
+
+# Beregn x-koordinatene for theta_1
+theta_2_const = 0  # Hold theta_2 konstant
+x_values_theta_1 = L1 * np.cos(np.radians(theta_1_range)) + L2 * np.cos(np.radians(theta_1_range + theta_2_const))
+
+# Beregn x-koordinatene for theta_2
+theta_1_const = 0  # Hold theta_1 konstant
+x_values_theta_2 = L1 * np.cos(np.radians(theta_1_const)) + L2 * np.cos(np.radians(theta_1_const + theta_2_range))
+
+# Opprett en figur
+plt.figure(figsize=(10, 6))
+
+# Plot for theta_1
+plt.plot(theta_1_range, x_values_theta_1, label='Endring med θ₁', color='blue')
+
+# Plot for theta_2
+plt.plot(theta_2_range, x_values_theta_2, label='Endring med θ₂', color='red')
+
+# Legg til tittel og etiketter
+plt.title('Endring av x-koordinat med hensyn til θ₁ og θ₂', fontsize=14)
+plt.xlabel('Vinkler (grader)', fontsize=13)
+plt.ylabel('x-koordinat (cm)', fontsize=13)
+plt.grid(True)
+plt.tick_params(axis='both', labelsize=10) 
+plt.axhline(0, color='black', linewidth=0.5, ls='--')
+plt.axvline(0, color='black', linewidth=0.5, ls='--')
+plt.legend()
+
+# Vis grafen
+plt.show()
