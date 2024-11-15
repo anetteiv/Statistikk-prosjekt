@@ -1,0 +1,11 @@
+\documentclass[a4paper]{article}
+\usepackage{hyperref}
+
+\begin{document}
+
+\section*{Lenke til nettside}
+Her er en lenke til "Kritiske verdier i t-fordelingen": https://wiki.math.ntnu.no/_media/ist100x/2020h/kritisk_verdi_t.pdf
+
+Her er en lenke til "Kritiske verdier i t-fordelingen": \url{https://wiki.math.ntnu.no/_media/ist100x/2020h/kritisk_verdi_t.pdf}
+
+\end{document}
